@@ -1,20 +1,17 @@
-/*   Arduino Radar Project
- *
- *   Updated version. Fits any screen resolution!
- *   Just change the values in the size() function,
- *   with your screen resolution.
- *      
- *  by Dejan Nedelkovski, 
- *  www.HowToMechatronics.com
- *  
- */
+/** Encabezado:
+ * @file Sonar.pde
+ * @brief Código de Processing del Sonar
+ * @author [Victor Caro Pastor](https://github.com/Vicaro1)
+ * @version  V1.3
+ * @date  28-08-2024
+*/
 
-import processing.serial.*; // imports library for serial communication
-import java.awt.event.KeyEvent; // imports library for reading the data from the serial port
+import processing.serial.*;         // importa biblioteca para comunicación serie
+import java.awt.event.KeyEvent;     // importa la librería para leer los datos del puerto serie
 import java.io.IOException;
 
-Serial myPort; // defines Object Serial
-// defubes variables
+Serial myPort; 
+
 String angle="";
 String distance="";
 String data="";
@@ -25,56 +22,66 @@ int index1=0;
 int index2=0;
 PFont orcFont;
 
-void setup() {
-  
- size (1920, 1080); // ***CHANGE THIS TO YOUR SCREEN RESOLUTION***
- smooth(); // Dibujar todo suavizado
- myPort = new Serial(this,"COM4", 9600); // starts the serial communication
- myPort.bufferUntil('.'); // reads the data from the serial port up to the character '.'. So actually it reads this: angle,distance.
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SETUP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+void setup() 
+{
+ size (1920, 1080);    // Resolucion de pantalla
+ smooth();             // Dibujar todo suavizado
+ myPort = new Serial(this,"COM4", 9600); 
+ 
+ // lee los datos del puerto serie hasta el caracter '.'. Así que en realidad lee esto: ángulo,distancia.
+ myPort.bufferUntil('.'); 
 }
 
-void draw() {
-  
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DRAW ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+void draw() 
+{
   fill(98,245,31);
-  // simulating motion blur and slow fade of the moving line
+  // simulación de desenfoque de movimiento y desvanecimiento lento de la línea en movimiento
   noStroke();
   fill(0,4); 
   rect(0, 0, width, height-height*0.065); 
   
-  fill(98,245,31); // green color
-  // calls the functions for drawing the radar
+  fill(98,245,31); // Color Verde
+  // llama a las funciones para dibujar el sonar
   drawRadar(); 
   drawLine();
   drawObject();
   drawText();
 }
 
-void serialEvent (Serial myPort) { // starts reading data from the Serial Port
-  // reads the data from the Serial Port up to the character '.' and puts it into the String variable "data".
+void serialEvent (Serial myPort) 
+{
   data = myPort.readStringUntil('.');
   data = data.substring(0,data.length()-1);
   
-  index1 = data.indexOf(","); // find the character ',' and puts it into the variable "index1"
-  angle= data.substring(0, index1); // read the data from position "0" to position of the variable index1 or thats the value of the angle the Arduino Board sent into the Serial Port
-  distance= data.substring(index1+1, data.length()); // read the data from position "index1" to the end of the data pr thats the value of the distance
+  index1 = data.indexOf(","); 
+  angle= data.substring(0, index1); 
+  distance= data.substring(index1+1, data.length()); 
   
-  // converts the String variables into Integer
   iAngle = int(angle);
   iDistance = int(distance);
 }
 
-void drawRadar() { // Funcion que dibuja el fondo del radar
+void drawRadar() 
+{ 
+  // Funcion que dibuja el fondo del radar
   pushMatrix();
-  translate(width/2,height-height*0.074); // moves the starting coordinats to new location
+  translate(width/2,height-height*0.074);
   noFill(); // sin relleno
   strokeWeight(1); // Ancho de la linea
   stroke(98,245,31); // pintar en rgb, en este caso verde
-  // draws the arc lines
+ 
+  // arcos
   arc(0,0,(width-width*0.0625),(width-width*0.0625),PI,TWO_PI);
   arc(0,0,(width-width*0.27),(width-width*0.27),PI,TWO_PI);
   arc(0,0,(width-width*0.479),(width-width*0.479),PI,TWO_PI);
   arc(0,0,(width-width*0.687),(width-width*0.687),PI,TWO_PI);
-  // draws the angle lines
+  // lineas angulos
   line(-width/2,0,width/2,0);
   line(0,0,(-width/2)*cos(radians(30)),(-width/2)*sin(radians(30)));
   line(0,0,(-width/2)*cos(radians(60)),(-width/2)*sin(radians(60)));
@@ -85,32 +92,35 @@ void drawRadar() { // Funcion que dibuja el fondo del radar
   popMatrix();
 }
 
-void drawObject() { // funcion que dibuja las lineas rojas
+void drawObject()
+{ 
+  // funcion que dibuja las lineas rojas
   pushMatrix();
-  translate(width/2,height-height*0.074); // moves the starting coordinats to new location
+  translate(width/2,height-height*0.074);
   strokeWeight(10); // Grosor de la linea
   stroke(255,10,10); // red color
-  //pixsDistance = iDistance*((height-height*0.0000008)*0.025); // covers the distance from the sensor from cm to pixels
+  //pixsDistance = iDistance*((height-height*0.0000008)*0.025); 
   pixsDistance =iDistance*27;
-  // limiting the range to 40 cms
+  
   if(iDistance<40){
-    // draws the object according to the angle and the distance
   line(pixsDistance*cos(radians(iAngle)),-pixsDistance*sin(radians(iAngle)),(width-width*0.505)*cos(radians(iAngle)),-(width-width*0.505)*sin(radians(iAngle)));
   }
   popMatrix();
 }
 
-void drawLine() { // funcion que dibuja las lineas moviles del radar
+void drawLine() 
+{
+  // funcion que dibuja las lineas moviles del radar
   pushMatrix();
   strokeWeight(10); // ancho de la linea
   stroke(30,250,60); // color verde
-  translate(width/2,height-height*0.074); // moves the starting coordinats to new location
-  line(0,0,(height-height*0.12)*cos(radians(iAngle)),-(height-height*0.12)*sin(radians(iAngle))); // draws the line according to the angle
+  translate(width/2,height-height*0.074); 
+  line(0,0,(height-height*0.12)*cos(radians(iAngle)),-(height-height*0.12)*sin(radians(iAngle))); 
   popMatrix();
 }
 
-void drawText() { // draws the texts on the screen
-  
+void drawText() 
+{ 
   pushMatrix();
   if(iDistance>40) {
   noObject = "Out of Range";
